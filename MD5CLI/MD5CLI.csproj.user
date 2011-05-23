@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <StartArguments>"C:\temp\Windows 7 Professional with Service Pack 1 (x64) - DVD (French)\fr_windows_7_professional_with_sp1_x64_dvd_621756.iso" ed735d55415bee976b771989be8f7005</StartArguments>
+  </PropertyGroup>
+</Project>
