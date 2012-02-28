@@ -99,11 +99,12 @@ namespace MD5CLI
 
 		public override string ToString()
 		{
-			string hex = "";
+			StringBuilder hex = new StringBuilder(hashAlgorithm.HashSize / 8);
 			foreach (byte b in Hash)
-				hex += b.ToString("x2");
-
-			return hex;
+			{
+				hex.AppendFormat("{0:x2}", b);
+			}
+			return hex.ToString();
 		}
 	}
 
