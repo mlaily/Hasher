@@ -84,20 +84,20 @@ namespace MD5CLI
 
         public static void WriteCLIPercentage(int percent)
         {
-            percent = (int)Math.Max(0, Math.Min(Math.Floor(percent / 2.0), 50));
-            StringBuilder sb = new StringBuilder();
-            sb.Append("[");
-            for (int i = 1; i <= percent; i++)
+            int percentByTwo = (int)Math.Max(0, Math.Min(Math.Floor(percent / 2.0), 50));
+            StringBuilder dots = new StringBuilder();
+            dots.Append("[");
+            for (int i = 1; i <= percentByTwo; i++)
             {
-                sb.Append(".");
+                dots.Append(".");
             }
-            for (int i = percent; i < 50; i++)
+            for (int i = percentByTwo; i < 50; i++)
             {
-                sb.Append(" ");
+                dots.Append(" ");
             }
-            sb.Append("]");
+            dots.Append("]");
             
-            Console.Write("\r{0}", sb.ToString());
+            Console.Write("\r{0} {1}%", dots, percent);
         }
 
         public enum HashType
@@ -108,7 +108,5 @@ namespace MD5CLI
         }
 
     }
-
-   
 
 }
