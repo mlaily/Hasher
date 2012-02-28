@@ -65,8 +65,8 @@ namespace MD5CLI
             }
             //on peut commencer...
             Console.WriteLine();
-            ASyncFileHashAlgorithm asyncHash = new ASyncFileHashAlgorithm(HashAlgorithm.Create(string.Format("{0}", hashType)));
-            asyncHash.FileHashingProgress += delegate(object sender, ASyncFileHashAlgorithm.FileHashingProgressArgs e)
+            ASyncFileHasher asyncHash = new ASyncFileHasher(HashAlgorithm.Create(string.Format("{0}", hashType)));
+            asyncHash.FileHashingProgress += delegate(object sender, ASyncFileHasher.FileHashingProgressArgs e)
             {
                 WriteCLIPercentage((int)((double)e.TotalBytesRead / (double)e.Size * 100.0));
             };
@@ -91,7 +91,6 @@ namespace MD5CLI
             {
                 sb.Append(".");
             }
-            j = 0;
             for (int i = percent; i < 50; i++)
             {
                 sb.Append(" ");
@@ -110,105 +109,6 @@ namespace MD5CLI
 
     }
 
-    public class ASyncFileHashAlgorithm
-    {
-
-        public class FileHashingProgressArgs
-        {
-            public long TotalBytesRead { get; private set; }
-            public long Size { get; private set; }
-            public FileHashingProgressArgs(long totalBytesRead, long size)
-            {
-                this.TotalBytesRead = totalBytesRead;
-                this.Size = size;
-            }
-        }
-
-        protected HashAlgorithm hashAlgorithm;
-        protected byte[] hash;
-        protected bool cancel = false;
-        protected int bufferSize = 4096;
-        protected int maxRaiseEventTime = 100;
-        protected long lastTime = 0;
-        public delegate void FileHashingProgressHandler(object sender, FileHashingProgressArgs e);
-        public event FileHashingProgressHandler FileHashingProgress;
-
-        public ASyncFileHashAlgorithm(HashAlgorithm hashAlgorithm)
-        {
-            this.hashAlgorithm = hashAlgorithm;
-        }
-
-        public byte[] ComputeHash(Stream stream)
-        {
-            cancel = false;
-            hash = null;
-            int _bufferSize = bufferSize; // this makes it impossible to change the buffer size while computing  
-
-            byte[] readAheadBuffer, buffer;
-            int readAheadBytesRead, bytesRead;
-            long size, totalBytesRead = 0;
-
-            size = stream.Length;
-            readAheadBuffer = new byte[_bufferSize];
-            readAheadBytesRead = stream.Read(readAheadBuffer, 0, readAheadBuffer.Length);
-
-            totalBytesRead += readAheadBytesRead;
-
-            do
-            {
-                bytesRead = readAheadBytesRead;
-                buffer = readAheadBuffer;
-
-                readAheadBuffer = new byte[_bufferSize];
-                readAheadBytesRead = stream.Read(readAheadBuffer, 0, readAheadBuffer.Length);
-
-                totalBytesRead += readAheadBytesRead;
-
-                if (readAheadBytesRead == 0)
-                    hashAlgorithm.TransformFinalBlock(buffer, 0, bytesRead);
-                else
-                    hashAlgorithm.TransformBlock(buffer, 0, bytesRead, buffer, 0);
-                if (DateTime.Now.Ticks - lastTime > maxRaiseEventTime)
-                {
-                    FileHashingProgress(this, new FileHashingProgressArgs(totalBytesRead, size));
-                    lastTime = DateTime.Now.Ticks;
-                }
-            } while (readAheadBytesRead != 0 && !cancel);
-            FileHashingProgress(this, new FileHashingProgressArgs(size, size));
-            if (cancel)
-                return hash = null;
-
-            return hash = hashAlgorithm.Hash;
-        }
-
-        public int BufferSize
-        {
-            get
-            { return bufferSize; }
-            set
-            { bufferSize = value; }
-        }
-
-        public byte[] Hash
-        {
-            get
-            { return hash; }
-        }
-
-        public void Cancel()
-        {
-            cancel = true;
-        }
-
-        public override string ToString()
-        {
-            string hex = "";
-            foreach (byte b in Hash)
-                hex += b.ToString("x2");
-
-            return hex;
-        }
-    }
-
+   
 
 }
