@@ -12,13 +12,15 @@ namespace MD5CLI
 
 		public class FileHashingProgressArgs
 		{
-			public long TotalBytesRead { get; private set; }
-			public long Size { get; private set; }
+			public long TotalBytesRead { get; protected set; }
+			public long Size { get; protected set; }
+			public DateTime StartTime { get; protected set; }
 
-			public FileHashingProgressArgs(long totalBytesRead, long size)
+			public FileHashingProgressArgs(long totalBytesRead, long size, DateTime startTime)
 			{
 				this.TotalBytesRead = totalBytesRead;
 				this.Size = size;
+				this.StartTime = startTime;
 			}
 		}
 
@@ -28,6 +30,8 @@ namespace MD5CLI
 		protected int bufferSize = 4096;
 		protected int maxRaiseEventTime = 100;
 		protected long lastTime = 0;
+		protected DateTime lastStartTime;
+
 		public delegate void FileHashingProgressHandler(object sender, FileHashingProgressArgs e);
 		public event FileHashingProgressHandler FileHashingProgress;
 
@@ -52,6 +56,9 @@ namespace MD5CLI
 
 			totalBytesRead += readAheadBytesRead;
 
+			//initialized here, to get a time as accurate as possible
+			lastStartTime = DateTime.Now;
+
 			do
 			{
 				bytesRead = readAheadBytesRead;
@@ -72,11 +79,11 @@ namespace MD5CLI
 				}
 				if (DateTime.Now.Ticks - lastTime > maxRaiseEventTime)
 				{
-					FileHashingProgress(this, new FileHashingProgressArgs(totalBytesRead, size));
+					FileHashingProgress(this, new FileHashingProgressArgs(totalBytesRead, size, lastStartTime));
 					lastTime = DateTime.Now.Ticks;
 				}
 			} while (readAheadBytesRead != 0 && !cancel);
-			FileHashingProgress(this, new FileHashingProgressArgs(size, size));
+			FileHashingProgress(this, new FileHashingProgressArgs(size, size, lastStartTime));
 			if (cancel)
 			{
 				return hash = null;
