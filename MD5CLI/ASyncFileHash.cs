@@ -14,6 +14,7 @@ namespace MD5CLI
 		{
 			public long TotalBytesRead { get; private set; }
 			public long Size { get; private set; }
+
 			public FileHashingProgressArgs(long totalBytesRead, long size)
 			{
 				this.TotalBytesRead = totalBytesRead;
@@ -62,9 +63,13 @@ namespace MD5CLI
 				totalBytesRead += readAheadBytesRead;
 
 				if (readAheadBytesRead == 0)
+				{
 					hashAlgorithm.TransformFinalBlock(buffer, 0, bytesRead);
+				}
 				else
+				{
 					hashAlgorithm.TransformBlock(buffer, 0, bytesRead, buffer, 0);
+				}
 				if (DateTime.Now.Ticks - lastTime > maxRaiseEventTime)
 				{
 					FileHashingProgress(this, new FileHashingProgressArgs(totalBytesRead, size));
@@ -73,23 +78,22 @@ namespace MD5CLI
 			} while (readAheadBytesRead != 0 && !cancel);
 			FileHashingProgress(this, new FileHashingProgressArgs(size, size));
 			if (cancel)
+			{
 				return hash = null;
+			}
 
 			return hash = hashAlgorithm.Hash;
 		}
 
 		public int BufferSize
 		{
-			get
-			{ return bufferSize; }
-			set
-			{ bufferSize = value; }
+			get { return bufferSize; }
+			set { bufferSize = value; }
 		}
 
 		public byte[] Hash
 		{
-			get
-			{ return hash; }
+			get { return hash; }
 		}
 
 		public void Cancel()
