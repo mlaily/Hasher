@@ -11,6 +11,7 @@ namespace MD5CLI
 	{
 		static void Main(string[] args)
 		{
+			Console.BufferWidth = 100;
 			string filePath = string.Empty;
 			string hashToTest = string.Empty;
 			HashType hashType = HashType.Unknown;
@@ -73,7 +74,8 @@ namespace MD5CLI
 				{
 					totalTime = 1;
 				}
-				WriteCLIPercentage((int)((double)e.TotalBytesRead / (double)e.Size * 100.0), HumanReadableLength(e.TotalBytesRead / totalTime));
+				WriteCLIPercentage((int)((double)e.TotalBytesRead / (double)e.Size * 100.0));
+				Console.Write(" {0}/{1} at {2}/s",HumanReadableLength(e.TotalBytesRead).PadLeft(7), HumanReadableLength(e.Size).PadLeft(7), HumanReadableLength(e.TotalBytesRead / totalTime).PadLeft(7));
 			};
 
 			using (System.IO.FileStream fs = new FileStream(filePath, FileMode.Open))
@@ -96,12 +98,12 @@ namespace MD5CLI
 			for (int i = 0; i < limits.Length; i++)
 			{
 				if (_length >= limits[i])
-					return String.Format("{0:##}" + units[i], ((double)_length / limits[i]));
+					return String.Format("{0:#0.#0}" + units[i], ((double)_length / limits[i]));
 			}
-			return String.Format("{0:##}B", _length);
+			return String.Format("{0}B", _length);
 		}
 
-		public static void WriteCLIPercentage(int percent, string speed)
+		public static void WriteCLIPercentage(int percent)
 		{
 			int percentByTwo = (int)Math.Max(0, Math.Min(Math.Floor(percent / 2.0), 50));
 			StringBuilder dots = new StringBuilder();
@@ -116,7 +118,7 @@ namespace MD5CLI
 			}
 			dots.Append("]");
 
-			Console.Write("\r{0} {1}/s {2}%", dots, speed.PadLeft(6), percent.ToString().PadLeft(3));
+			Console.Write("\r{1}% {0}", dots, percent.ToString().PadLeft(3));
 		}
 
 		public enum HashType

@@ -7,6 +7,9 @@ using System.IO;
 
 namespace MD5CLI
 {
+	/// <summary>
+	/// http://www.alexandre-gomes.com/?p=144
+	/// </summary>
 	public class ASyncFileHasher
 	{
 
