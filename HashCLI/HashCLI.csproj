@@ -8,8 +8,8 @@
     <ProjectGuid>{A3BC072D-7382-44F4-8983-9A15F6C2E615}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MD5CLI</RootNamespace>
-    <AssemblyName>MD5CLI</AssemblyName>
+    <RootNamespace>HashCLI</RootNamespace>
+    <AssemblyName>HashCLI</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>

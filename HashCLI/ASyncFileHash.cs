@@ -5,7 +5,7 @@ using System.Text;
 using System.Security.Cryptography;
 using System.IO;
 
-namespace MD5CLI
+namespace HashCLI
 {
 	/// <summary>
 	/// http://www.alexandre-gomes.com/?p=144
