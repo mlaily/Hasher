@@ -85,6 +85,7 @@ namespace HashCLI
 			}
 			else
 			{
+				this.Hash = hashAlgorithm.Hash;
 				return hashAlgorithm.Hash;
 			}
 		}
@@ -96,6 +97,10 @@ namespace HashCLI
 
 		public override string ToString()
 		{
+			if (Hash == null)
+			{
+				return "";
+			}
 			StringBuilder hex = new StringBuilder(hashAlgorithm.HashSize / 8);
 			foreach (byte b in Hash)
 			{
