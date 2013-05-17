@@ -66,8 +66,8 @@ namespace HashCLI
 			}
 			//on peut commencer...
 			Console.WriteLine();
-			ASyncFileHasher asyncHash = new ASyncFileHasher(HashAlgorithm.Create(string.Format("{0}", hashType)));
-			asyncHash.FileHashingProgress += delegate(object sender, ASyncFileHasher.FileHashingProgressArgs e)
+			AsyncFileHasher asyncHash = new AsyncFileHasher(HashAlgorithm.Create(string.Format("{0}", hashType)));
+			asyncHash.FileHashingProgress += delegate(object sender, AsyncFileHasher.FileHashingProgressArgs e)
 			{
 				int totalTime = (int)(DateTime.Now - e.StartTime).TotalSeconds;
 				if (totalTime <= 0)

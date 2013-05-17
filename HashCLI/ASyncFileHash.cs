@@ -9,65 +9,55 @@ namespace HashCLI
 {
 	/// <summary>
 	/// http://www.alexandre-gomes.com/?p=144
+	/// slightly modified
 	/// </summary>
-	public class ASyncFileHasher
+	public class AsyncFileHasher
 	{
+		private const int maxRaiseEventTime = 100;//ms
 
-		public class FileHashingProgressArgs
-		{
-			public long TotalBytesRead { get; protected set; }
-			public long Size { get; protected set; }
-			public DateTime StartTime { get; protected set; }
-
-			public FileHashingProgressArgs(long totalBytesRead, long size, DateTime startTime)
-			{
-				this.TotalBytesRead = totalBytesRead;
-				this.Size = size;
-				this.StartTime = startTime;
-			}
-		}
-
-		protected HashAlgorithm hashAlgorithm;
-		protected byte[] hash;
+		protected readonly HashAlgorithm hashAlgorithm;
 		protected bool cancel = false;
-		protected int bufferSize = 4096;
-		protected int maxRaiseEventTime = 100;
-		protected long lastTime = 0;
-		protected DateTime lastStartTime;
+
+		public int BufferSize { get; set; }
+		public byte[] Hash { get; protected set; }
 
 		public delegate void FileHashingProgressHandler(object sender, FileHashingProgressArgs e);
 		public event FileHashingProgressHandler FileHashingProgress;
 
-		public ASyncFileHasher(HashAlgorithm hashAlgorithm)
+		public AsyncFileHasher(HashAlgorithm hashAlgorithm)
 		{
 			this.hashAlgorithm = hashAlgorithm;
+			this.BufferSize = 4096;
 		}
 
 		public byte[] ComputeHash(Stream stream)
 		{
-			cancel = false;
-			hash = null;
-			int _bufferSize = bufferSize; // this makes it impossible to change the buffer size while computing  
+			// this makes it impossible to change the buffer size while computing  
+			int localBufferSize = this.BufferSize;
 
 			byte[] readAheadBuffer, buffer;
 			int readAheadBytesRead, bytesRead;
 			long size, totalBytesRead = 0;
 
+			DateTime lastTime = DateTime.MinValue;
+			DateTime startTime;
+			DateTime now;
+
 			size = stream.Length;
-			readAheadBuffer = new byte[_bufferSize];
+			readAheadBuffer = new byte[localBufferSize];
 			readAheadBytesRead = stream.Read(readAheadBuffer, 0, readAheadBuffer.Length);
 
 			totalBytesRead += readAheadBytesRead;
 
 			//initialized here, to get a time as accurate as possible
-			lastStartTime = DateTime.Now;
+			startTime = DateTime.Now;
 
 			do
 			{
 				bytesRead = readAheadBytesRead;
 				buffer = readAheadBuffer;
 
-				readAheadBuffer = new byte[_bufferSize];
+				readAheadBuffer = new byte[localBufferSize];
 				readAheadBytesRead = stream.Read(readAheadBuffer, 0, readAheadBuffer.Length);
 
 				totalBytesRead += readAheadBytesRead;
@@ -80,30 +70,23 @@ namespace HashCLI
 				{
 					hashAlgorithm.TransformBlock(buffer, 0, bytesRead, buffer, 0);
 				}
-				if (DateTime.Now.Ticks - lastTime > maxRaiseEventTime)
+				now = DateTime.Now;
+				if ((now - lastTime).TotalMilliseconds > maxRaiseEventTime)
 				{
-					FileHashingProgress(this, new FileHashingProgressArgs(totalBytesRead, size, lastStartTime));
-					lastTime = DateTime.Now.Ticks;
+					FileHashingProgress(this, new FileHashingProgressArgs(totalBytesRead, size, startTime));
+					lastTime = now;
 				}
 			} while (readAheadBytesRead != 0 && !cancel);
-			FileHashingProgress(this, new FileHashingProgressArgs(size, size, lastStartTime));
+			FileHashingProgress(this, new FileHashingProgressArgs(size, size, startTime));
+
 			if (cancel)
 			{
-				return hash = null;
+				return null;
 			}
-
-			return hash = hashAlgorithm.Hash;
-		}
-
-		public int BufferSize
-		{
-			get { return bufferSize; }
-			set { bufferSize = value; }
-		}
-
-		public byte[] Hash
-		{
-			get { return hash; }
+			else
+			{
+				return hashAlgorithm.Hash;
+			}
 		}
 
 		public void Cancel()
@@ -120,6 +103,19 @@ namespace HashCLI
 			}
 			return hex.ToString();
 		}
-	}
 
+		public class FileHashingProgressArgs
+		{
+			public long TotalBytesRead { get; protected set; }
+			public long Size { get; protected set; }
+			public DateTime StartTime { get; protected set; }
+
+			public FileHashingProgressArgs(long totalBytesRead, long size, DateTime startTime)
+			{
+				this.TotalBytesRead = totalBytesRead;
+				this.Size = size;
+				this.StartTime = startTime;
+			}
+		}
+	}
 }
