@@ -32,6 +32,7 @@ namespace HashCLI
 
 		public byte[] ComputeHash(Stream stream)
 		{
+			this.Hash = null;
 			// this makes it impossible to change the buffer size while computing  
 			int localBufferSize = this.BufferSize;
 
