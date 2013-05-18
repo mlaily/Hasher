@@ -20,10 +20,18 @@ namespace HashCLI
   the default algorithm is md5.
  - file path [hash to test against (hexadecimal string)]
   => calculates and compares the hash of the file against the provided hash.
-  the algorithm is automatically determined based on the length of the string.";
+  the algorithm is automatically determined based on the length of the string.
+
+Supported Algorithms:
+ - MD5
+ - SHA1
+ - SHA256
+ - SHA384
+ - SHA512";
 			if (args.Length == 0)
 			{
-				Console.WriteLine("HashCLI - version {0}\n{1}", Assembly.GetExecutingAssembly().GetName().Version.ToString(), help);
+				Console.WriteLine("HashCLI version {0}\nBy Melvyn Laily - arcanesanctum.net\n\n{1}",
+					Assembly.GetExecutingAssembly().GetName().Version.ToString(), help);
 				return;
 			}
 			string filePath = null;
