@@ -90,7 +90,7 @@ Supported Algorithms:
 			AsyncFileHasher asyncHash = new AsyncFileHasher(HashAlgorithm.Create(HashTypeNames[hashType]));
 			asyncHash.FileHashingProgress += new AsyncFileHasher.FileHashingProgressHandler(asyncHash_FileHashingProgress);
 
-			using (System.IO.FileStream fs = new FileStream(filePath, FileMode.Open))
+			using (System.IO.FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
 			{
 				asyncHash.ComputeHash(fs);
 			}
