@@ -14,6 +14,7 @@ namespace HashCLI
 	public class AsyncFileHasher
 	{
 		private const int maxRaiseEventTime = 100;//ms
+		private const int defaultBufferSize = 4096;
 
 		protected readonly HashAlgorithm hashAlgorithm;
 		protected bool cancel = false;
@@ -24,10 +25,19 @@ namespace HashCLI
 		public delegate void FileHashingProgressHandler(object sender, FileHashingProgressArgs e);
 		public event FileHashingProgressHandler FileHashingProgress;
 
+		protected void OnFileHashingProgress(long totalBytesRead, long size, DateTime startTime)
+		{
+			var handler = FileHashingProgress;
+			if (handler != null)
+			{
+				handler(this, new FileHashingProgressArgs(totalBytesRead, size, startTime));
+			}
+		}
+
 		public AsyncFileHasher(HashAlgorithm hashAlgorithm)
 		{
 			this.hashAlgorithm = hashAlgorithm;
-			this.BufferSize = 4096;
+			this.BufferSize = defaultBufferSize;
 		}
 
 		public byte[] ComputeHash(Stream stream)
@@ -44,7 +54,15 @@ namespace HashCLI
 			DateTime startTime;
 			DateTime now;
 
-			size = stream.Length;
+			if (stream.CanSeek)
+			{
+				size = stream.Length;
+			}
+			else
+			{
+				size = FileHashingProgressArgs.InvalidSize;
+			}
+
 			readAheadBuffer = new byte[localBufferSize];
 			readAheadBytesRead = stream.Read(readAheadBuffer, 0, readAheadBuffer.Length);
 
@@ -74,14 +92,15 @@ namespace HashCLI
 				now = DateTime.Now;
 				if ((now - lastTime).TotalMilliseconds > maxRaiseEventTime)
 				{
-					FileHashingProgress(this, new FileHashingProgressArgs(totalBytesRead, size, startTime));
+					OnFileHashingProgress(totalBytesRead, size, startTime);
 					lastTime = now;
 				}
 			} while (readAheadBytesRead != 0 && !cancel);
-			FileHashingProgress(this, new FileHashingProgressArgs(size, size, startTime));
+			OnFileHashingProgress(totalBytesRead, size, startTime);
 
 			if (cancel)
 			{
+				cancel = false;
 				return null;
 			}
 			else
@@ -96,7 +115,7 @@ namespace HashCLI
 			cancel = true;
 		}
 
-		public override string ToString()
+		public string GetHashString()
 		{
 			if (Hash == null)
 			{
@@ -109,19 +128,31 @@ namespace HashCLI
 			}
 			return hex.ToString();
 		}
+	}
 
-		public class FileHashingProgressArgs
+	public class FileHashingProgressArgs : EventArgs
+	{
+		public const long InvalidSize = -1;
+
+		public bool IsSizeValid()
 		{
-			public long TotalBytesRead { get; protected set; }
-			public long Size { get; protected set; }
-			public DateTime StartTime { get; protected set; }
+			return Size != InvalidSize;
+		}
 
-			public FileHashingProgressArgs(long totalBytesRead, long size, DateTime startTime)
-			{
-				this.TotalBytesRead = totalBytesRead;
-				this.Size = size;
-				this.StartTime = startTime;
-			}
+		public long TotalBytesRead { get; protected set; }
+		/// <summary>
+		/// Will always be InvalidSize if the stream length is unavailable.
+		/// </summary>
+		public long Size { get; protected set; }
+		public DateTime StartTime { get; protected set; }
+
+		public FileHashingProgressArgs(long totalBytesRead, DateTime startTime)
+			: this(totalBytesRead, InvalidSize, startTime) { }
+		public FileHashingProgressArgs(long totalBytesRead, long size, DateTime startTime)
+		{
+			this.TotalBytesRead = totalBytesRead;
+			this.Size = size;
+			this.StartTime = startTime;
 		}
 	}
 }
