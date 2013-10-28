@@ -89,8 +89,15 @@ namespace Hasher
 
 			do
 			{
-				bytesRead = stream.Read(buffer, 0, buffer.Length);
-				totalBytesRead += bytesRead;
+				if (!stream.CanRead)
+				{
+					bytesRead = 0;
+				}
+				else
+				{
+					bytesRead = stream.Read(buffer, 0, buffer.Length);
+					totalBytesRead += bytesRead;
+				}
 
 				if (bytesRead == 0)
 				{

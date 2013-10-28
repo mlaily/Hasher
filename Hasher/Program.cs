@@ -31,6 +31,7 @@ namespace Hasher
 {
 	class Program
 	{
+		private static Stream consoleInputStreamReference = null;
 		static void Main(string[] args)
 		{
 			string filePath = null;
@@ -38,6 +39,8 @@ namespace Hasher
 			HashType hashType = HashType.Unknown;
 			string hashTypeName = null;
 			bool readFromStandardInput = false;
+
+			consoleInputStreamReference = Console.OpenStandardInput();
 
 			if (!Console.IsInputRedirected) //input directly from the user
 			{
@@ -49,7 +52,7 @@ namespace Hasher
 				Console.CancelKeyPress += (o, e) =>
 				{
 					e.Cancel = true;
-					Console.OpenStandardInput().Close();
+					consoleInputStreamReference.Close();
 				};
 			}
 
@@ -123,7 +126,7 @@ namespace Hasher
 
 			if (readFromStandardInput)
 			{
-				using (var stdIn = Console.OpenStandardInput())
+				using (var stdIn = consoleInputStreamReference)
 				{
 					asyncHasher.ComputeHash(stdIn);
 				}
