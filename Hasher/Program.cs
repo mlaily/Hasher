@@ -202,10 +202,6 @@ namespace Hasher
 			StringBuilder dots = new StringBuilder();
 			if (percent < 0 || percent > 100)
 			{
-				if (invalidProgressIndicator >= baseLength || invalidProgressIndicator < 0)
-				{
-					directionRight = !directionRight;
-				}
 				dots.Append("[");
 				for (int i = 0; i < invalidProgressIndicator; i++)
 				{
@@ -219,6 +215,10 @@ namespace Hasher
 				}
 				dots.Append("]");
 				invalidProgressIndicator += directionRight ? 1 : -1;
+				if (invalidProgressIndicator >= baseLength || invalidProgressIndicator <= 0)
+				{
+					directionRight = !directionRight;
+				}
 				return dots.ToString();
 			}
 			else
