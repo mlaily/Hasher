@@ -104,13 +104,6 @@ namespace Hasher
 				readFromStandardInput = true;
 			}
 
-			//sanity check
-			if (hashType != HashType.Unknown && hashTypeName != null)
-			{
-				Console.WriteLine("Warning: the provided hash string is not a valid hash for the specified algorithm ({0})!", hashTypeName);
-				Console.WriteLine("The algorithm defined by the hash string ({0}) will take precedence", HashTypeNames[hashType]);
-			}
-
 			if (hashType == HashType.Unknown) //meaning no hash string was provided
 			{
 				var match = HashTypeNames.FirstOrDefault(x => StringComparer.OrdinalIgnoreCase.Equals(x.Value, hashTypeName));
