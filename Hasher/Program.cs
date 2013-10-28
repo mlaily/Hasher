@@ -125,8 +125,8 @@ namespace Hasher
 			}
 
 			//let's hash!
-			AsyncFileHasher asyncHasher = new AsyncFileHasher(HashAlgorithm.Create(HashTypeNames[hashType]));
-			asyncHasher.FileHashingProgress += new AsyncFileHasher.FileHashingProgressHandler(asyncHash_FileHashingProgress);
+			FileHasher asyncHasher = new FileHasher(HashAlgorithm.Create(HashTypeNames[hashType]));
+			asyncHasher.FileHashingProgress += new EventHandler<FileHashingProgressArgs>(asyncHash_FileHashingProgress);
 
 			if (readFromStandardInput)
 			{
@@ -147,12 +147,12 @@ namespace Hasher
 			string resultHash = asyncHasher.GetHashString();
 			if (hashToTestAgainst == null)
 			{
-				Console.WriteLine("Result: {0}", resultHash);
+				Console.WriteLine("\nResult: {0}", resultHash);
 			}
 			else
 			{
 				bool isOk = StringComparer.OrdinalIgnoreCase.Equals(resultHash, hashToTestAgainst);
-				Console.WriteLine("Result: {0}\nReference:  {1}\nCalculated: {2}", isOk ? "OK" : "FAIL", hashToTestAgainst, resultHash);
+				Console.WriteLine("\nReference:  {1}\nCalculated: {2}\n\nResult: {0}", isOk ? "OK" : "FAIL", hashToTestAgainst, resultHash);
 			}
 		}
 
@@ -167,10 +167,10 @@ namespace Hasher
 			Console.Write("\r");
 			string progressBar;
 			string humanReadableSize;
-			if (e.IsSizeValid())
+			if (e.IsStreamLengthValid())
 			{
-				progressBar = GetProgressBar((int)((double)e.TotalBytesRead / (double)e.Size * 100f));
-				humanReadableSize = HumanReadableLength(e.Size);
+				progressBar = GetProgressBar((int)((double)e.TotalBytesRead / (double)e.StreamLength * 100f));
+				humanReadableSize = HumanReadableLength(e.StreamLength);
 			}
 			else
 			{
