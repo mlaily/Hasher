@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("HashCLI")]
+[assembly: AssemblyTitle("File Hasher Utility")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("ArcaneSanctum.net")]
-[assembly: AssemblyProduct("HashCLI")]
+[assembly: AssemblyProduct("File Hasher Utility")]
 [assembly: AssemblyCopyright("Copyright © Melvyn Laily 2013")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

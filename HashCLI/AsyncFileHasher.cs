@@ -5,7 +5,7 @@ using System.Text;
 using System.Security.Cryptography;
 using System.IO;
 
-namespace HashCLI
+namespace Hasher
 {
 	/// <summary>
 	/// http://www.alexandre-gomes.com/?p=144

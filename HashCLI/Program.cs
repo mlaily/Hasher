@@ -7,7 +7,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Reflection;
 
-namespace HashCLI
+namespace Hasher
 {
 	class Program
 	{
@@ -29,7 +29,7 @@ Supported Algorithms:
  - SHA384
  - SHA512
 
-NOTE: to force an argument to be interpreted as an input file path, put it between quotes";
+NOTE: to force an argument to be interpreted as an input file path, put it between quotes.";
 			if (args.Length == 0)
 			{
 				Console.WriteLine("C# Hash Utility version {0}\nBy Melvyn Laily - arcanesanctum.net\n\n{1}",
