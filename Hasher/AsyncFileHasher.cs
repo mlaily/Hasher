@@ -50,7 +50,7 @@ namespace Hasher
 
 			byte[] readAheadBuffer, buffer;
 			int readAheadBytesRead, bytesRead;
-			long size, totalBytesRead = 0;
+			long size, totalBytesRead = 0, lastEventedTotalBytesRead = 0;
 
 			DateTime lastTime = DateTime.MinValue;
 			DateTime startTime;
@@ -96,10 +96,14 @@ namespace Hasher
 				if ((now - lastTime).TotalMilliseconds > maxRaiseEventTime)
 				{
 					OnFileHashingProgress(totalBytesRead, size, startTime);
+					lastEventedTotalBytesRead = totalBytesRead;
 					lastTime = now;
 				}
 			} while (readAheadBytesRead != 0 && !cancel);
-			OnFileHashingProgress(totalBytesRead, size, startTime);
+			if (lastEventedTotalBytesRead != totalBytesRead)
+			{
+				OnFileHashingProgress(totalBytesRead, size, startTime);
+			}
 
 			if (cancel)
 			{
