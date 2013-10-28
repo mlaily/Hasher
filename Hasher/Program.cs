@@ -47,7 +47,7 @@ namespace Hasher
 				}
 				else
 				{
-
+					DisplayHelp();
 					return;
 				}
 			}
