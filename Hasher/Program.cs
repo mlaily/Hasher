@@ -39,17 +39,18 @@ namespace Hasher
 			string hashTypeName = null;
 			bool readFromStandardInput = false;
 
-			if (!Console.IsInputRedirected) //requires .Net 4.5
+			if (!Console.IsInputRedirected) //input directly from the user
 			{
-				if (args.Length > 0)
-				{
-					readFromStandardInput = true;
-				}
-				else
+				if (args.Length == 0)
 				{
 					DisplayHelp();
 					return;
 				}
+				Console.CancelKeyPress += (o, e) =>
+				{
+					e.Cancel = true;
+					Console.OpenStandardInput().Close();
+				};
 			}
 
 			//arguments detection
@@ -129,11 +130,6 @@ namespace Hasher
 
 			if (readFromStandardInput)
 			{
-				Console.CancelKeyPress += (o, e) =>
-				{
-					e.Cancel = true;
-					Console.OpenStandardInput().Close();
-				};
 				using (var stdIn = Console.OpenStandardInput())
 				{
 					asyncHasher.ComputeHash(stdIn);
