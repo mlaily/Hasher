@@ -33,28 +33,6 @@ namespace Hasher
 	{
 		static void Main(string[] args)
 		{
-			const string help =
-@"Valid inputs:
- - filePath [hash algorithm name]
-  => returns the file hash as a hexadecimal string.
-  the default algorithm is md5.
- - filePath [hash to test against (hexadecimal string)]
-  => calculate and compare the hash of the file against the provided hash.
-  the algorithm is automatically determined based on the length of the string.
-
-If no file path is provided,
-	the program will try to read from the standard input stream.
-
-To force an argument to be interpreted as an input file path,
-	put it between quotes.
-
-Supported Algorithms:
- - MD5
- - SHA1
- - SHA256
- - SHA384
- - SHA512";
-
 			string filePath = null;
 			string hashToTestAgainst = null;
 			HashType hashType = HashType.Unknown;
@@ -69,8 +47,7 @@ Supported Algorithms:
 				}
 				else
 				{
-					Console.WriteLine("C# Hash Utility version {0}\nBy Melvyn Laily - arcanesanctum.net\n\n{1}",
-					Assembly.GetExecutingAssembly().GetName().Version, help);
+
 					return;
 				}
 			}
@@ -78,6 +55,16 @@ Supported Algorithms:
 			//arguments detection
 			foreach (var argument in args)
 			{
+				var comparer = StringComparer.OrdinalIgnoreCase;
+				if (comparer.Equals(argument, "/?") ||
+					comparer.Equals(argument, "/help") ||
+					comparer.Equals(argument, "-h") ||
+					comparer.Equals(argument, "--help"))
+				{
+					DisplayHelp();
+					return;
+				}
+
 				if (HashTypeNames.Any(x => StringComparer.OrdinalIgnoreCase.Equals(x.Value, argument)))
 				{
 					//the user requested a specific algorithm by its name
@@ -284,6 +271,33 @@ Supported Algorithms:
 				}
 			}
 			return String.Format("{0}B", length);
+		}
+
+		private static void DisplayHelp()
+		{
+			const string help =
+@"Valid inputs:
+ - filePath [hash algorithm name]
+  => returns the file hash as a hexadecimal string.
+  the default algorithm is md5.
+ - filePath [hash to test against (hexadecimal string)]
+  => calculate and compare the hash of the file against the provided hash.
+  the algorithm is automatically determined based on the length of the string.
+
+If no file path is provided,
+	the program will try to read from the standard input stream.
+
+To force an argument to be interpreted as an input file path,
+	put it between quotes.
+
+Supported Algorithms:
+ - MD5
+ - SHA1
+ - SHA256
+ - SHA384
+ - SHA512";
+			Console.WriteLine("C# Hash Utility version {0}\nBy Melvyn Laily - arcanesanctum.net\n\n{1}",
+				Assembly.GetExecutingAssembly().GetName().Version, help);
 		}
 
 		private static readonly Dictionary<HashType, string> HashTypeNames = new Dictionary<HashType, string>()
