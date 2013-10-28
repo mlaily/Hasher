@@ -39,8 +39,10 @@ namespace Hasher
   => returns the file hash as a hexadecimal string.
   the default algorithm is md5.
  - filePath [hash to test against (hexadecimal string)]
-  => calculates and compares the hash of the file against the provided hash.
+  => calculate and compare the hash of the file against the provided hash.
   the algorithm is automatically determined based on the length of the string.
+
+If no file path is provided, the program will try to read data from the standard input stream.
 
 Supported Algorithms:
  - MD5
@@ -60,6 +62,7 @@ NOTE: to force an argument to be interpreted as an input file path, put it betwe
 			string hashToTestAgainst = null;
 			HashType hashType = HashType.Unknown;
 			string hashTypeName = null;
+			bool readFromStandardInput = false;
 
 			//arguments detection
 			foreach (var argument in args)
@@ -97,10 +100,9 @@ NOTE: to force an argument to be interpreted as an input file path, put it betwe
 				}
 			}
 
-			if (filePath == null) //if the path was set, it is valid
+			if (filePath == null) //if the path is set, we already verified it's valid
 			{
-				Console.WriteLine("A valid file path is needed.");
-				return;
+				readFromStandardInput = true;
 			}
 
 			//sanity check
@@ -127,10 +129,21 @@ NOTE: to force an argument to be interpreted as an input file path, put it betwe
 			AsyncFileHasher asyncHasher = new AsyncFileHasher(HashAlgorithm.Create(HashTypeNames[hashType]));
 			asyncHasher.FileHashingProgress += new AsyncFileHasher.FileHashingProgressHandler(asyncHash_FileHashingProgress);
 
-			using (System.IO.FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+			if (readFromStandardInput)
 			{
-				asyncHasher.ComputeHash(fs);
+				using (var stdIn = Console.OpenStandardInput())
+				{
+					asyncHasher.ComputeHash(stdIn);
+				}
 			}
+			else
+			{
+				using (System.IO.FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+				{
+					asyncHasher.ComputeHash(fs);
+				}
+			}
+		
 
 			Console.WriteLine();
 			string resultHash = asyncHasher.GetHashString();
