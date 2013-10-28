@@ -1,4 +1,6 @@
-﻿using System;
+﻿//I assume this file is public domain?
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,7 +11,7 @@ namespace Hasher
 {
 	/// <summary>
 	/// http://www.alexandre-gomes.com/?p=144
-	/// slightly modified
+	/// slightly modified to add some features, clean the style, and fix some potential bugs.
 	/// </summary>
 	public class AsyncFileHasher
 	{
