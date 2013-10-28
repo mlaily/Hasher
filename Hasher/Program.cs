@@ -42,27 +42,38 @@ namespace Hasher
   => calculate and compare the hash of the file against the provided hash.
   the algorithm is automatically determined based on the length of the string.
 
-If no file path is provided, the program will try to read data from the standard input stream.
+If no file path is provided,
+	the program will try to read from the standard input stream.
+
+To force an argument to be interpreted as an input file path,
+	put it between quotes.
 
 Supported Algorithms:
  - MD5
  - SHA1
  - SHA256
  - SHA384
- - SHA512
+ - SHA512";
 
-NOTE: to force an argument to be interpreted as an input file path, put it between quotes.";
-			if (args.Length == 0)
-			{
-				Console.WriteLine("C# Hash Utility version {0}\nBy Melvyn Laily - arcanesanctum.net\n\n{1}",
-					Assembly.GetExecutingAssembly().GetName().Version, help);
-				return;
-			}
 			string filePath = null;
 			string hashToTestAgainst = null;
 			HashType hashType = HashType.Unknown;
 			string hashTypeName = null;
 			bool readFromStandardInput = false;
+
+			if (!Console.IsInputRedirected) //requires .Net 4.5
+			{
+				if (args.Length > 0)
+				{
+					readFromStandardInput = true;
+				}
+				else
+				{
+					Console.WriteLine("C# Hash Utility version {0}\nBy Melvyn Laily - arcanesanctum.net\n\n{1}",
+					Assembly.GetExecutingAssembly().GetName().Version, help);
+					return;
+				}
+			}
 
 			//arguments detection
 			foreach (var argument in args)
@@ -94,7 +105,7 @@ NOTE: to force an argument to be interpreted as an input file path, put it betwe
 						else
 						{
 							//if the arg is not an algorithm name, not a hash, and not a valid file, it is ignored.
-							Console.WriteLine("Unexpected argument will be ignored: {0}", argument);
+							Console.WriteLine("Unexpected argument will be ignored: {0}\nHint: calling this program without any argument will display the help.", argument);
 						}
 					}
 				}
@@ -131,6 +142,11 @@ NOTE: to force an argument to be interpreted as an input file path, put it betwe
 
 			if (readFromStandardInput)
 			{
+				Console.CancelKeyPress += (o, e) =>
+				{
+					e.Cancel = true;
+					Console.OpenStandardInput().Close();
+				};
 				using (var stdIn = Console.OpenStandardInput())
 				{
 					asyncHasher.ComputeHash(stdIn);
@@ -143,7 +159,6 @@ NOTE: to force an argument to be interpreted as an input file path, put it betwe
 					asyncHasher.ComputeHash(fs);
 				}
 			}
-		
 
 			Console.WriteLine();
 			string resultHash = asyncHasher.GetHashString();
@@ -156,7 +171,6 @@ NOTE: to force an argument to be interpreted as an input file path, put it betwe
 				bool isOk = StringComparer.OrdinalIgnoreCase.Equals(resultHash, hashToTestAgainst);
 				Console.WriteLine("Result: {0}\nReference:  {1}\nCalculated: {2}", isOk ? "OK" : "FAIL", hashToTestAgainst, resultHash);
 			}
-
 		}
 
 		private static void asyncHash_FileHashingProgress(object sender, FileHashingProgressArgs e)
@@ -168,11 +182,21 @@ NOTE: to force an argument to be interpreted as an input file path, put it betwe
 				totalTime = 1;
 			}
 			Console.Write("\r");
-			//TODO: handle the case where e.Size is FileHashingProgressArgs.InvalidSize (the stream has no Length)
-			var progressBar = GetProgressBar((int)((double)e.TotalBytesRead / (double)e.Size * 100f));
+			string progressBar;
+			string humanReadableSize;
+			if (e.IsSizeValid())
+			{
+				progressBar = GetProgressBar((int)((double)e.TotalBytesRead / (double)e.Size * 100f));
+				humanReadableSize = HumanReadableLength(e.Size);
+			}
+			else
+			{
+				progressBar = GetProgressBar(-1);
+				humanReadableSize = "??";
+			}
 			Console.Write(progressBar);
 			lineLength += progressBar.Length;
-			string moreInfos = string.Format(" {0}/{1} @{2}/s", HumanReadableLength(e.TotalBytesRead), HumanReadableLength(e.Size), HumanReadableLength(e.TotalBytesRead / totalTime));
+			string moreInfos = string.Format(" {0}/{1} @{2}/s", HumanReadableLength(e.TotalBytesRead), humanReadableSize, HumanReadableLength(e.TotalBytesRead / totalTime));
 			lineLength += moreInfos.Length;
 			int padding = Console.BufferWidth - lineLength - 1;
 			if (padding > 0)
@@ -182,26 +206,56 @@ NOTE: to force an argument to be interpreted as an input file path, put it betwe
 			Console.Write(moreInfos);
 		}
 
+		private static int invalidProgressIndicator = 0;
+		private static bool directionRight = true;
+		/// <summary>
+		/// If the percent value is an invalid percentage (less than 0 or more than 100)
+		/// the returned string is a moving star...
+		/// </summary>
 		private static string GetProgressBar(int percent)
 		{
 			const int baseLength = 50;
 			const int fullLength = 52;
-			int percentByTwo = (int)Math.Max(0, Math.Min(Math.Floor(percent / 2f), baseLength));
 			StringBuilder dots = new StringBuilder();
-			dots.Append("[");
-			for (int i = 1; i <= percentByTwo; i++)
+			if (percent < 0 || percent > 100)
 			{
-				dots.Append(".");
+				if (invalidProgressIndicator >= baseLength || invalidProgressIndicator < 0)
+				{
+					directionRight = !directionRight;
+				}
+				dots.Append("[");
+				for (int i = 0; i < invalidProgressIndicator; i++)
+				{
+					dots.Append(" ");
+				}
+				dots.Append('*');
+				//take account of the star and the bracket
+				for (int i = invalidProgressIndicator + 2; i < baseLength + 2; i++)
+				{
+					dots.Append(" ");
+				}
+				dots.Append("]");
+				invalidProgressIndicator += directionRight ? 1 : -1;
+				return dots.ToString();
 			}
-			for (int i = percentByTwo; i < baseLength; i++)
+			else
 			{
-				dots.Append(" ");
+				int percentByTwo = (int)Math.Max(0, Math.Min(Math.Floor(percent / 2f), baseLength));
+				dots.Append("[");
+				for (int i = 1; i <= percentByTwo; i++)
+				{
+					dots.Append(".");
+				}
+				for (int i = percentByTwo; i < baseLength; i++)
+				{
+					dots.Append(" ");
+				}
+				dots.Append("]");
+				string percentage = string.Format("{0}%", percent);
+				int halves = (fullLength / 2) - percentage.Length / 2;
+				int alignRight = percentage.Length % 2;
+				return dots.ToString(0, halves) + percentage + dots.ToString(fullLength - halves + alignRight, halves - alignRight);
 			}
-			dots.Append("]");
-			string percentage = string.Format("{0}%", percent);
-			int halves = (fullLength / 2) - percentage.Length / 2;
-			int alignRight = percentage.Length % 2;
-			return dots.ToString(0, halves) + percentage + dots.ToString(fullLength - halves + alignRight, halves - alignRight);
 		}
 
 		private static string HumanReadableLength(long length)

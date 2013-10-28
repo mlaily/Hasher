@@ -66,12 +66,13 @@ namespace Hasher
 			}
 
 			readAheadBuffer = new byte[localBufferSize];
-			readAheadBytesRead = stream.Read(readAheadBuffer, 0, readAheadBuffer.Length);
-
-			totalBytesRead += readAheadBytesRead;
 
 			//initialized here, to get a time as accurate as possible
 			startTime = DateTime.Now;
+
+			readAheadBytesRead = stream.Read(readAheadBuffer, 0, readAheadBuffer.Length);
+
+			totalBytesRead += readAheadBytesRead;
 
 			do
 			{
