@@ -175,14 +175,14 @@ namespace Hasher
 			}
 			Console.Write(progressBar);
 			lineLength += progressBar.Length;
-			string moreInfos = string.Format(" {0}/{1} @{2}/s", HumanReadableLength(e.TotalBytesRead), humanReadableSize, HumanReadableLength(e.TotalBytesRead / totalTime));
-			lineLength += moreInfos.Length;
+			string moreInfo = string.Format(" {0}/{1} @{2}/s", HumanReadableLength(e.TotalBytesRead), humanReadableSize, HumanReadableLength(e.TotalBytesRead / totalTime));
+			lineLength += moreInfo.Length;
 			int padding = Console.BufferWidth - lineLength - 1;
 			if (padding > 0)
 			{
 				Console.Write(new string(' ', padding));
 			}
-			Console.Write(moreInfos);
+			Console.Write(moreInfo);
 		}
 
 		private static int invalidProgressIndicator = 0;
