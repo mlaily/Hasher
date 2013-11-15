@@ -40,21 +40,9 @@ namespace Hasher
 			string hashTypeName = null;
 			bool readFromStandardInput = false;
 
-			consoleInputStreamReference = Console.OpenStandardInput();
+			int ignoredArgsCount = 0;
 
-			if (!Console.IsInputRedirected) //input directly from the user
-			{
-				if (args.Length == 0)
-				{
-					DisplayHelp();
-					return;
-				}
-				Console.CancelKeyPress += (o, e) =>
-				{
-					e.Cancel = true;
-					consoleInputStreamReference.Close();
-				};
-			}
+			consoleInputStreamReference = Console.OpenStandardInput();
 
 			//arguments detection
 			foreach (var argument in args)
@@ -96,15 +84,40 @@ namespace Hasher
 						else
 						{
 							//if the arg is not an algorithm name, not a hash, and not a valid file, it is ignored.
-							Console.WriteLine("Unexpected argument will be ignored: {0}\nHint: calling this program without any argument will display the help.", argument);
+							ignoredArgsCount++;
+							Console.WriteLine("Unexpected argument will be ignored: {0}", argument);
 						}
 					}
+				}
+			}
+
+			if (!Console.IsInputRedirected) //input directly from the user
+			{
+				if (args.Length - ignoredArgsCount == 0)
+				{
+					DisplayHelp();
+					return;
+				}
+				else
+				{
+					Console.CancelKeyPress += (o, e) =>
+					{
+						e.Cancel = true;
+						consoleInputStreamReference.Close();
+					};
 				}
 			}
 
 			if (filePath == null) //if the path is set, we already verified it's valid
 			{
 				readFromStandardInput = true;
+			}
+			else
+			{
+				if (Console.IsInputRedirected)
+				{
+					Console.WriteLine("WARNING: The standard input is redirected, but a file was also specified.\nIgnoring the standard input...");
+				}
 			}
 
 			if (hashType == HashType.Unknown) //meaning no hash string was provided
