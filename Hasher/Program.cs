@@ -154,7 +154,6 @@ namespace Hasher
 			}
 		}
 
-
 		private static void asyncHash_FileHashingProgress(object sender, FileHashingProgressArgs e)
 		{
 			int lineLength = 0;

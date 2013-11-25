@@ -53,6 +53,12 @@
     <Compile Include="UnitTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Hasher\Hasher.csproj">
+      <Project>{a3bc072d-7382-44f4-8983-9a15f6c2e615}</Project>
+      <Name>Hasher</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>
