@@ -237,32 +237,20 @@ namespace Hasher
 			}
 		}
 
+		static readonly string[] units = new string[] { "B", "KB", "MB", "GB", "TB", "PB", "EB" };
 		private static string HumanReadableLength(long length)
 		{
-			Dictionary<long, string> units = new Dictionary<long, string>() 
+			length = Math.Abs(length);
+			for (int i = 1; i < units.Length; i++)
 			{
-				{1024L * 1024 * 1024 * 1024 * 1024, "PB" },
-				{1024L * 1024 * 1024 * 1024, "TB" },
-				{1024L * 1024 * 1024, "GB" },
-				{1024L * 1024, "MB" },
-				{1024L, "KB" },
-			};
-			foreach (var unit in units)
-			{
-				if (length >= unit.Key)
+				if (length < 1L << (i * 10)) // length < current unit value ?
 				{
-					double value = ((double)length / unit.Key);
-					if (value < 1000)
-					{
-						return String.Format("{0:#0.0}" + unit.Value, value);
-					}
-					else
-					{
-						return String.Format("{0:#0}" + unit.Value, value);
-					}
+					double value = ((double)length / (1L << ((i - 1) * 10))); //then we take the previous unit
+					string format = value < 1000 ? "{0:#0.0}" : "{0:#0}";
+					return string.Format("{0:#0.0}" + units[i - 1], value);
 				}
 			}
-			return String.Format("{0}B", length);
+			throw new ArgumentOutOfRangeException("length", "length is too big!");
 		}
 
 		private static void DisplayHelp()
