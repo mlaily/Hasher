@@ -8,22 +8,29 @@ namespace Hasher
 {
 	public static class Util
 	{
-		static readonly string[] units = new string[] { "B", "KB", "MB", "GB", "TB", "PB", "EB" };
+		//we can't shift more than 63 bits with a long, so we would need a big int to support ZB and YB...
+		static readonly string[] units = new string[] { "B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB" };
+		/// <summary>
+		/// Supports any non negative value up to long.MaxValue (~8EB)
+		/// </summary>
 		public static string HumanReadableLength(long length)
 		{
-			length = Math.Abs(length);
+			if (length < 0) throw new ArgumentOutOfRangeException("length", "length cannot be negative!");
+			long shiftResult = 0;
+			long previousShiftResult = 0;
 			for (int i = 1; i < units.Length; i++)
 			{
-				if (length < 1L << (i * 10)) // length < current unit value ?
+				shiftResult = 1L << (i * 10);
+				if (length < shiftResult || shiftResult == 64) // length < current unit value ? (or overflow, meaning we are in the EB range)
 				{
-					double value = ((double)length / (1L << ((i - 1) * 10))); //then we take the previous unit
-					string format = value < 1000 ? "{0:#0.0}" : "{0:#0}";
-					return string.Format("{0:#0.0}" + units[i - 1], value);
+					double value = ((double)length / previousShiftResult); //then we take the previous unit
+					string format = value < 1000 ? "{0:#0.0}{1}" : "{0:#0}{1}";
+					return string.Format(format, value, units[i - 1]);
 				}
+				previousShiftResult = shiftResult;
 			}
-			throw new ArgumentOutOfRangeException("length", "length is too big!");
+			throw new ArgumentOutOfRangeException("length", "length is too big!"); //This is impossible
 		}
-
 
 		/// <summary>
 		/// If the percent value is an invalid percentage (less than 0 or more than 100)
