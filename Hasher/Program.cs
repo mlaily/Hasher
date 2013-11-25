@@ -32,6 +32,7 @@ namespace Hasher
 	class Program
 	{
 		private static Stream consoleInputStreamReference = null;
+		private static Util.ProgressIndicatorState progressIndicatorState = null;
 
 		static void Main(string[] args)
 		{
@@ -153,6 +154,7 @@ namespace Hasher
 			}
 		}
 
+
 		private static void asyncHash_FileHashingProgress(object sender, FileHashingProgressArgs e)
 		{
 			int lineLength = 0;
@@ -166,12 +168,12 @@ namespace Hasher
 			string humanReadableSize;
 			if (e.IsStreamLengthValid())
 			{
-				progressBar = Util.GetProgressBar((int)((double)e.TotalBytesRead / (double)e.StreamLength * 100f));
+				progressBar = Util.GetProgressBar((int)((double)e.TotalBytesRead / (double)e.StreamLength * 100f), ref progressIndicatorState);
 				humanReadableSize = Util.HumanReadableLength(e.StreamLength);
 			}
 			else
 			{
-				progressBar = Util.GetProgressBar(-1);
+				progressBar = Util.GetProgressBar(-1, ref progressIndicatorState);
 				humanReadableSize = "??";
 			}
 			Console.Write(progressBar);
