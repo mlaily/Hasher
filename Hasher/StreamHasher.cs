@@ -31,7 +31,7 @@ namespace Hasher
 	/// original code borrowed from http://www.alexandre-gomes.com/?p=144
 	/// not much of the original code still exist at this point...
 	/// </summary>
-	public class FileHasher
+	public class StreamHasher
 	{
 		private const int maxRaiseEventTime = 100;//ms
 		private const int defaultBufferSize = 4096;
@@ -53,7 +53,7 @@ namespace Hasher
 			}
 		}
 
-		public FileHasher(HashAlgorithm hashAlgorithm)
+		public StreamHasher(HashAlgorithm hashAlgorithm)
 		{
 			this.hashAlgorithm = hashAlgorithm;
 			this.BufferSize = defaultBufferSize;
