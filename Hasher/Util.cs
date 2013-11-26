@@ -13,7 +13,7 @@ namespace Hasher
 		/// <summary>
 		/// Supports any non negative value up to long.MaxValue (~8EB)
 		/// </summary>
-		public static string HumanReadableLength(long length)
+		public static string ToHumanReadableString(long length)
 		{
 			if (length < 0) throw new ArgumentOutOfRangeException("length", "length cannot be negative!");
 			long shiftResult = 0;

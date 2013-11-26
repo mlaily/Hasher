@@ -181,7 +181,7 @@ namespace Hasher
 			if (e.IsStreamLengthValid())
 			{
 				progressBar = Util.GetProgressBar((int)((double)e.TotalBytesRead / (double)e.StreamLength * 100f), ref progressIndicatorState);
-				humanReadableSize = Util.HumanReadableLength(e.StreamLength);
+				humanReadableSize = Util.ToHumanReadableString(e.StreamLength);
 			}
 			else
 			{
@@ -190,7 +190,7 @@ namespace Hasher
 			}
 			Console.Write(progressBar);
 			lineLength += progressBar.Length;
-			string moreInfo = string.Format(" {0}/{1} @{2}/s", Util.HumanReadableLength(e.TotalBytesRead), humanReadableSize, Util.HumanReadableLength(e.TotalBytesRead / totalTime));
+			string moreInfo = string.Format(" {0}/{1} @{2}/s", Util.ToHumanReadableString(e.TotalBytesRead), humanReadableSize, Util.ToHumanReadableString(e.TotalBytesRead / totalTime));
 			lineLength += moreInfo.Length;
 			int padding = Console.BufferWidth - lineLength - 1;
 			if (padding > 0)

@@ -19,7 +19,7 @@ namespace UnitTestProject
 			sw.Start();
 			for (long i = 0; i < iterations; i += every)
 			{
-				var result = Util.HumanReadableLength(i);
+				var result = Util.ToHumanReadableString(i);
 				//if (i % every == 0)
 				//{
 				//	Trace.TraceInformation("iteration {0}", i);
