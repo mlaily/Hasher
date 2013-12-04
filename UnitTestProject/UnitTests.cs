@@ -12,7 +12,8 @@ namespace UnitTestProject
 		[TestMethod]
 		public void TestHumanReadableLength()
 		{
-			//Trace.TraceInformation(Util.HumanReadableLength(long.MaxValue));
+			Trace.TraceInformation(Util.ToHumanReadableString(10));
+			Trace.TraceInformation(Util.ToHumanReadableString(int.MaxValue));
 			var sw = new Stopwatch();
 			long every = 100000000000;
 			long iterations = 10000000 * every;

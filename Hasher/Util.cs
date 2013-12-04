@@ -17,7 +17,7 @@ namespace Hasher
 		{
 			if (length < 0) throw new ArgumentOutOfRangeException("length", "length cannot be negative!");
 			long shiftResult = 0;
-			long previousShiftResult = 0;
+			long previousShiftResult = 1;
 			for (int i = 1; i < units.Length; i++)
 			{
 				shiftResult = 1L << (i * 10);
