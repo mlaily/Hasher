@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>hasher</id>
+    <title>Hasher</title>
+    <version>1.0</version>
+    <authors>Melvyn Laily</authors>
+    <owners>Melvyn Laily</owners>
+    <summary>CLI hash (checksum) utility.</summary>
+    <description>CLI hash (checksum) utility.
+Valid inputs:
+ - filePath [hash algorithm name]
+  => returns the file hash as a hexadecimal string.
+  the default algorithm is md5.
+ - filePath [hash to test against (hexadecimal string)]
+  => calculate and compare the hash of the file against the provided hash.
+  the algorithm is automatically determined based on the length of the string.
+
+If no file path is provided, the program will try to read from the standard input stream.
+
+To force an argument to be interpreted as an input file path, put it between quotes.
+
+Supported Algorithms:
+ - MD5
+ - SHA1
+ - SHA256
+ - SHA384
+ - SHA512
+	</description>
+    <projectUrl>http://hg.arcanesanctum.net/c-hasher-utility</projectUrl>
+    <tags>file hasher hash tool checksum md5 sha1 utility cli command-line</tags>
+    <copyright>Melvyn Laily</copyright>
+    <licenseUrl>http://opensource.org/licenses/MIT</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <iconUrl>http://arcanesanctum.net/wp-content/uploads/hasher/terminal.jpg</iconUrl>
+    <!--<dependencies>
+      <dependency id="" version="" />
+    </dependencies>-->
+    <releaseNotes></releaseNotes>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>
