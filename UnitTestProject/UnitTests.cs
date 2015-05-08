@@ -43,8 +43,9 @@ namespace UnitTestProject
 
 		private static string HumanReadableLength_OldImplementation(long length)
 		{
-			Dictionary<long, string> units = new Dictionary<long, string>() 
+			Dictionary<long, string> units = new Dictionary<long, string>()
 			{
+				{1024L * 1024 * 1024 * 1024 * 1024 * 1024, "EB" },
 				{1024L * 1024 * 1024 * 1024 * 1024, "PB" },
 				{1024L * 1024 * 1024 * 1024, "TB" },
 				{1024L * 1024 * 1024, "GB" },
@@ -56,7 +57,7 @@ namespace UnitTestProject
 				if (length >= unit.Key)
 				{
 					double value = ((double)length / unit.Key);
-					if (value < 1000)
+					if (value < 1024)
 					{
 						return String.Format("{0:#0.0}" + unit.Value, value);
 					}
