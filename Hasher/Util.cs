@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,23 +9,27 @@ namespace Hasher
 {
 	public static class Util
 	{
-		// we can't shift more than 63 bits with a long, so we would need a big int to support ZB and YB...
+		// Note: we can't shift more than 63 bits with a long, so we would need a big int to support ZB and YB...
 		static readonly string[] units = new string[] { "B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB" };
 		/// <summary>
-		/// Accepts any non negative value up to long.MaxValue (~8EB)
+		/// Convert a value representing a byte length into a human readable string composed of the formatted value and the appropriate unit.
+		/// The output is formatted so that it's never more than 6 characters long.
 		/// </summary>
-		public static string ToHumanReadableString(long length)
+		/// <param name="length">A non negative value representing a byte length to be converted to a human readable string.</param>
+		/// <param name="provider">An object that supplies culture-specific formatting information. If null, the Invariant Culture will be used.</param>
+		/// <remarks>Accept any non negative value up to long.MaxValue (~8EB)</remarks>
+		public static string ToHumanReadableString(long length, IFormatProvider provider = null)
 		{
 			if (length < 0) throw new ArgumentOutOfRangeException(nameof(length), "length cannot be negative!");
-			long unitMaxValue = 0;
-			long previousUnitMaxValue = 1;
+			long unitMaxValue, previousUnitMaxValue = 1;
 			for (int i = 1; i < units.Length; i++)
 			{
 				unitMaxValue = 1L << (i * 10); // The basic idea is that each unit's max value is the previous one times 1024
-				if (length < unitMaxValue || unitMaxValue == 64) // length < current unit value ? (or overflow, meaning we are in the EB range)
+				if (length < unitMaxValue || unitMaxValue == 64) // length < current unit value ? (or overflow, meaning we are in the EB range, shifting 70bits)
 				{
-					double value = ((double)length / previousUnitMaxValue); // then we take the previous unit
-					return value < 1024 ? $"{value:#0.0}{units[i - 1]}" : $"{value:#0}{units[i - 1]}";
+					double value = ((double)length / previousUnitMaxValue);
+					var p = provider ?? CultureInfo.InvariantCulture;
+					return (value <= 999 ? value.ToString("#0.0", p) : value.ToString("#0", p)) + units[i - 1];
 				}
 				previousUnitMaxValue = unitMaxValue;
 			}

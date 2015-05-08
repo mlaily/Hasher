@@ -10,10 +10,20 @@ namespace UnitTestProject
 	public class UnitTests
 	{
 		[TestMethod]
-		public void TestHumanReadableLength()
+		public void HumanReadableLength_ResultCheck()
 		{
-			Trace.TraceInformation(Util.ToHumanReadableString(10));
-			Trace.TraceInformation(Util.ToHumanReadableString(int.MaxValue));
+			Assert.AreEqual("0.0B", Util.ToHumanReadableString(0));
+			Assert.AreEqual("1.0B", Util.ToHumanReadableString(1));
+			Assert.AreEqual("2.0B", Util.ToHumanReadableString(2));
+			Assert.AreEqual("999.0B", Util.ToHumanReadableString(999));
+			Assert.AreEqual("1000B", Util.ToHumanReadableString(1000));
+			Assert.AreEqual("1.0KB", Util.ToHumanReadableString(1024));
+			Assert.AreEqual("1.0KB", Util.ToHumanReadableString(1025));
+		}
+
+		[TestMethod]
+		public void HumanReadableLength_PerformanceTest()
+		{
 			var sw = new Stopwatch();
 			long every = 100000000000;
 			long iterations = 10000000 * every;
@@ -27,7 +37,7 @@ namespace UnitTestProject
 				//}
 			}
 			sw.Stop();
-			Trace.TraceInformation(sw.Elapsed.ToString());
+			Trace.TraceInformation($"New implementation: {sw.Elapsed}");
 			sw.Restart();
 			for (long i = 0; i < iterations; i += every)
 			{
@@ -38,12 +48,10 @@ namespace UnitTestProject
 				//}
 			}
 			sw.Stop();
-			Trace.TraceInformation(sw.Elapsed.ToString());
+			Trace.TraceInformation($"Old implementation: {sw.Elapsed}");
 		}
 
-		private static string HumanReadableLength_OldImplementation(long length)
-		{
-			Dictionary<long, string> units = new Dictionary<long, string>()
+		private static readonly Dictionary<double, string> units = new Dictionary<double, string>()
 			{
 				{1024L * 1024 * 1024 * 1024 * 1024 * 1024, "EB" },
 				{1024L * 1024 * 1024 * 1024 * 1024, "PB" },
@@ -52,22 +60,24 @@ namespace UnitTestProject
 				{1024L * 1024, "MB" },
 				{1024L, "KB" },
 			};
+		private static string HumanReadableLength_OldImplementation(long length)
+		{
 			foreach (var unit in units)
 			{
 				if (length >= unit.Key)
 				{
-					double value = ((double)length / unit.Key);
-					if (value < 1024)
+					double value = (length / unit.Key);
+					if (value <= 999) // The output is formatted so that it's never more than 6 chars long.
 					{
-						return String.Format("{0:#0.0}" + unit.Value, value);
+						return $"{value:#0.0}" + unit.Value;
 					}
 					else
 					{
-						return String.Format("{0:#0}" + unit.Value, value);
+						return $"{value:#0}" + unit.Value;
 					}
 				}
 			}
-			return String.Format("{0}B", length);
+			return $"{length}B";
 		}
 	}
 }
