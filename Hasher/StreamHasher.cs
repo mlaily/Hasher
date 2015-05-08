@@ -1,4 +1,4 @@
-﻿//Copyright (c) 2013 Melvyn Laily
+﻿//Copyright (c) 2013, 2015 Melvyn Laily
 
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files (the "Software"), to deal
@@ -139,14 +139,14 @@ namespace Hasher
 
 		public string GetHashString()
 		{
-			if (Hash == null)
+			if (this.Hash == null)
 			{
 				return "";
 			}
 			StringBuilder hex = new StringBuilder(hashAlgorithm.HashSize / 8);
-			foreach (byte b in Hash)
+			foreach (byte b in this.Hash)
 			{
-				hex.AppendFormat("{0:x2}", b);
+				hex.AppendFormat($"{b:x2}");
 			}
 			return hex.ToString();
 		}
@@ -156,20 +156,18 @@ namespace Hasher
 	{
 		public const long InvalidStreamLength = -1;
 
-		public bool IsStreamLengthValid()
-		{
-			return StreamLength != InvalidStreamLength;
-		}
+		public bool IsStreamLengthValid() => StreamLength != InvalidStreamLength;
 
-		public long TotalBytesRead { get; private set; }
+		public long TotalBytesRead { get; }
 		/// <summary>
 		/// Will always be InvalidStreamLength if the stream length is unavailable.
 		/// </summary>
-		public long StreamLength { get; private set; }
-		public DateTime StartTime { get; private set; }
+		public long StreamLength { get; }
+		public DateTime StartTime { get; }
 
 		public FileHashingProgressArgs(long totalBytesRead, DateTime startTime)
-			: this(totalBytesRead, InvalidStreamLength, startTime) { }
+			: this(totalBytesRead, InvalidStreamLength, startTime)
+		{ }
 		public FileHashingProgressArgs(long totalBytesRead, long streamLength, DateTime startTime)
 		{
 			this.TotalBytesRead = totalBytesRead;

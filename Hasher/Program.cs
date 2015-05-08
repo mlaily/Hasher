@@ -1,4 +1,4 @@
-﻿//Copyright (c) 2013 Melvyn Laily
+﻿//Copyright (c) 2013, 2015 Melvyn Laily
 
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files (the "Software"), to deal
@@ -31,6 +31,7 @@ namespace Hasher
 {
 	class Program
 	{
+		private const HashType DefaultAlgorithm = HashType.MD5;
 		private static Stream consoleInputStreamReference = null;
 		private static Util.ProgressIndicatorState progressIndicatorState = null;
 
@@ -46,7 +47,7 @@ namespace Hasher
 
 			consoleInputStreamReference = Console.OpenStandardInput();
 
-			//arguments detection
+			// arguments detection
 			foreach (var argument in args)
 			{
 				var comparer = StringComparer.OrdinalIgnoreCase;
@@ -61,13 +62,13 @@ namespace Hasher
 
 				if (HashTypeNames.Any(x => StringComparer.OrdinalIgnoreCase.Equals(x.Value, argument)))
 				{
-					//the user requested a specific algorithm by its name
+					// the user requested a specific algorithm by its name
 					hashTypeName = argument;
 				}
 				else
 				{
-					//check for a hash string
-					//for md5: 128 bits is 16 bytes. with 2 char per byte in hexa. hence the "* 4"
+					// check for a hash string
+					// for md5: 128 bits is 16 bytes. with 2 chars per byte in hexa. hence the "* 4"
 					int hashTypeBits = argument.Length * 4;
 					if (Enum.IsDefined(typeof(HashType), hashTypeBits) //the length corresponds to a hash string
 						&& Regex.IsMatch(argument, @"^[0-9A-F]*$", RegexOptions.IgnoreCase)) // the string is a valid hexadecimal number
@@ -77,23 +78,23 @@ namespace Hasher
 					}
 					else
 					{
-						//check if it's a valid file
+						// check if it's a valid file
 						string withoutQuotes = argument.Trim(new char[] { '"' });
-						if (System.IO.File.Exists(withoutQuotes))
+						if (File.Exists(withoutQuotes))
 						{
 							filePath = withoutQuotes;
 						}
 						else
 						{
-							//if the arg is not an algorithm name, not a hash, and not a valid file, it is ignored.
+							// if the arg is not an algorithm name, not a hash, and not a valid file, it is ignored.
 							ignoredArgsCount++;
-							Console.WriteLine("Unexpected argument will be ignored: {0}", argument);
+							Console.WriteLine($"Unexpected argument will be ignored: {argument}");
 						}
 					}
 				}
 			}
 
-			if (!Console.IsInputRedirected) //input directly from the user
+			if (!Console.IsInputRedirected) // input directly from the user
 			{
 				if (args.Length - ignoredArgsCount == 0)
 				{
@@ -105,12 +106,12 @@ namespace Hasher
 					Console.CancelKeyPress += (o, e) =>
 					{
 						e.Cancel = true;
-						consoleInputStreamReference.Close();
+						consoleInputStreamReference.Dispose();
 					};
 				}
 			}
 
-			if (filePath == null) //if the path is set, we already verified it's valid
+			if (filePath == null) // if the path is set, we already verified it's valid
 			{
 				readFromStandardInput = true;
 			}
@@ -122,7 +123,7 @@ namespace Hasher
 				}
 			}
 
-			if (hashType == HashType.Unknown) //meaning no hash string was provided
+			if (hashType == HashType.Unknown) // meaning no hash string was provided
 			{
 				var match = HashTypeNames.FirstOrDefault(x => StringComparer.OrdinalIgnoreCase.Equals(x.Value, hashTypeName));
 				if (match.Key != HashType.Unknown)
@@ -131,11 +132,11 @@ namespace Hasher
 				}
 				else
 				{
-					hashType = HashType.MD5;
+					hashType = DefaultAlgorithm;
 				}
 			}
 
-			//let's hash!
+			// let's hash!
 			StreamHasher asyncHasher = new StreamHasher(HashAlgorithm.Create(HashTypeNames[hashType]));
 			asyncHasher.FileHashingProgress += new EventHandler<FileHashingProgressArgs>(asyncHash_FileHashingProgress);
 
@@ -148,7 +149,7 @@ namespace Hasher
 			}
 			else
 			{
-				using (System.IO.FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+				using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
 				{
 					asyncHasher.ComputeHash(fs);
 				}
@@ -158,12 +159,12 @@ namespace Hasher
 			string resultHash = asyncHasher.GetHashString();
 			if (hashToTestAgainst == null)
 			{
-				Console.WriteLine("\nResult: {0}", resultHash);
+				Console.WriteLine($"\nResult: {resultHash}");
 			}
 			else
 			{
 				bool isOk = StringComparer.OrdinalIgnoreCase.Equals(resultHash, hashToTestAgainst);
-				Console.WriteLine("\nReference:  {1}\nCalculated: {2}\n\nResult: {0}", isOk ? "OK" : "FAIL", hashToTestAgainst, resultHash);
+				Console.WriteLine($"\nReference:  {hashToTestAgainst}\nCalculated: {resultHash}\n\nResult: {(isOk ? "OK" : "FAIL")}");
 			}
 		}
 
@@ -202,8 +203,11 @@ namespace Hasher
 
 		private static void DisplayHelp()
 		{
-			const string help =
-@"Valid inputs:
+			Console.WriteLine(
+$@"C# Hash Utility version {Assembly.GetExecutingAssembly().GetName().Version}
+By Melvyn Laïly - arcanesanctum.net
+
+Valid inputs:
  - filePath [hash algorithm name]
   => returns the file hash as a hexadecimal string.
   the default algorithm is md5.
@@ -222,9 +226,7 @@ Supported Algorithms:
  - SHA1
  - SHA256
  - SHA384
- - SHA512";
-			Console.WriteLine("C# Hash Utility version {0}\nBy Melvyn Laily - arcanesanctum.net\n\n{1}",
-				Assembly.GetExecutingAssembly().GetName().Version, help);
+ - SHA512");
 		}
 
 		private static readonly Dictionary<HashType, string> HashTypeNames = new Dictionary<HashType, string>()
@@ -237,7 +239,7 @@ Supported Algorithms:
 			{ HashType.SHA512, "SHA512" },
 		};
 
-		//The values are actually the number of output bits for the algorithms
+		// The values are actually the number of output bits for the algorithms
 		public enum HashType
 		{
 			Unknown = 0,

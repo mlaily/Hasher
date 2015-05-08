@@ -8,28 +8,27 @@ namespace Hasher
 {
 	public static class Util
 	{
-		//we can't shift more than 63 bits with a long, so we would need a big int to support ZB and YB...
+		// we can't shift more than 63 bits with a long, so we would need a big int to support ZB and YB...
 		static readonly string[] units = new string[] { "B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB" };
 		/// <summary>
-		/// Supports any non negative value up to long.MaxValue (~8EB)
+		/// Accepts any non negative value up to long.MaxValue (~8EB)
 		/// </summary>
 		public static string ToHumanReadableString(long length)
 		{
-			if (length < 0) throw new ArgumentOutOfRangeException("length", "length cannot be negative!");
-			long shiftResult = 0;
-			long previousShiftResult = 1;
+			if (length < 0) throw new ArgumentOutOfRangeException(nameof(length), "length cannot be negative!");
+			long unitMaxValue = 0;
+			long previousUnitMaxValue = 1;
 			for (int i = 1; i < units.Length; i++)
 			{
-				shiftResult = 1L << (i * 10);
-				if (length < shiftResult || shiftResult == 64) // length < current unit value ? (or overflow, meaning we are in the EB range)
+				unitMaxValue = 1L << (i * 10); // The basic idea is that each unit's max value is the previous one times 1024
+				if (length < unitMaxValue || unitMaxValue == 64) // length < current unit value ? (or overflow, meaning we are in the EB range)
 				{
-					double value = ((double)length / previousShiftResult); //then we take the previous unit
-					string format = value < 1000 ? "{0:#0.0}{1}" : "{0:#0}{1}";
-					return string.Format(format, value, units[i - 1]);
+					double value = ((double)length / previousUnitMaxValue); // then we take the previous unit
+					return value < 1024 ? $"{value:#0.0}{units[i - 1]}" : $"{value:#0}{units[i - 1]}";
 				}
-				previousShiftResult = shiftResult;
+				previousUnitMaxValue = unitMaxValue;
 			}
-			throw new ArgumentOutOfRangeException("length", "length is too big!"); //This is impossible
+			throw new ArgumentOutOfRangeException(nameof(length), "length is too big!"); // this is impossible
 		}
 
 		/// <summary>
@@ -53,7 +52,7 @@ namespace Hasher
 					dots.Append(" ");
 				}
 				dots.Append('*');
-				//take account of the star and the bracket
+				// take account of the star and the bracket
 				for (int i = progressIndicator.MovingIndicatorPosition + 2; i < baseLength + 2; i++)
 				{
 					dots.Append(" ");
@@ -79,7 +78,7 @@ namespace Hasher
 					dots.Append(" ");
 				}
 				dots.Append("]");
-				string percentage = string.Format("{0}%", percent);
+				string percentage = $"{percent}%";
 				int halves = (fullLength / 2) - percentage.Length / 2;
 				int alignRight = percentage.Length % 2;
 				return dots.ToString(0, halves) + percentage + dots.ToString(fullLength - halves + alignRight, halves - alignRight);
