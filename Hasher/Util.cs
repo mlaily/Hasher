@@ -28,8 +28,8 @@ namespace Hasher
 				if (length < unitMaxValue || unitMaxValue == 64) // length < current unit value ? (or overflow, meaning we are in the EB range, shifting 70bits)
 				{
 					double value = ((double)length / previousUnitMaxValue);
-					var p = provider ?? CultureInfo.InvariantCulture;
-					return (value <= 999 ? value.ToString("#0.0", p) : value.ToString("#0", p)) + units[i - 1];
+					var format = value <= 999 ? "{0:#0.0}{1}" : "{0:#0}{1}";
+					return string.Format(provider ?? CultureInfo.InvariantCulture, format, value, units[i - 1]);
 				}
 				previousUnitMaxValue = unitMaxValue;
 			}
